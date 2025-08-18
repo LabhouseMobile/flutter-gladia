@@ -1,8 +1,7 @@
-/// Class for messages received from API during real-time speech recognition
-class TranscriptionMessage {
-  /// Message type
-  final String type;
+import 'package:gladia/src/models/realtime_response.dart';
 
+/// Class for messages received from API during real-time speech recognition
+class TranscriptionMessage extends RealtimeResponse {
   /// Session ID
   final String sessionId;
 
@@ -14,7 +13,7 @@ class TranscriptionMessage {
 
   /// Creates a new instance of [TranscriptionMessage]
   const TranscriptionMessage({
-    required this.type,
+    required super.type,
     required this.sessionId,
     required this.createdAt,
     required this.data,
@@ -26,8 +25,7 @@ class TranscriptionMessage {
       type: json['type'] as String,
       sessionId: json['session_id'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
-      data: TranscriptionMessageData.fromJson(
-          json['data'] as Map<String, dynamic>),
+      data: TranscriptionMessageData.fromJson(json['data'] as Map<String, dynamic>),
     );
   }
 
@@ -42,8 +40,7 @@ class TranscriptionMessage {
   }
 
   @override
-  String toString() =>
-      'TranscriptionMessage(type: $type, sessionId: $sessionId, createdAt: $createdAt, data: $data)';
+  String toString() => 'TranscriptionMessage(type: $type, sessionId: $sessionId, createdAt: $createdAt, data: $data)';
 }
 
 /// Transcription message data
@@ -69,8 +66,7 @@ class TranscriptionMessageData {
     return TranscriptionMessageData(
       id: json['id'] as String,
       isFinal: json['is_final'] as bool,
-      utterance:
-          UtteranceInfo.fromJson(json['utterance'] as Map<String, dynamic>),
+      utterance: UtteranceInfo.fromJson(json['utterance'] as Map<String, dynamic>),
     );
   }
 
@@ -84,8 +80,7 @@ class TranscriptionMessageData {
   }
 
   @override
-  String toString() =>
-      'TranscriptionMessageData(id: $id, isFinal: $isFinal, utterance: $utterance)';
+  String toString() => 'TranscriptionMessageData(id: $id, isFinal: $isFinal, utterance: $utterance)';
 }
 
 /// Utterance information
@@ -140,6 +135,5 @@ class UtteranceInfo {
   }
 
   @override
-  String toString() =>
-      'UtteranceInfo(text: $text, start: $start, end: $end, language: $language, channel: $channel)';
+  String toString() => 'UtteranceInfo(text: $text, start: $start, end: $end, language: $language, channel: $channel)';
 }

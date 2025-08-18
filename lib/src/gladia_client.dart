@@ -4,7 +4,9 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:gladia/src/models/realtime_response.dart';
 import 'package:gladia/src/models/transcription_list.dart';
+import 'package:gladia/src/models/translation_message.dart';
 import 'package:http_parser/http_parser.dart';
 
 import 'exceptions/exceptions.dart';
@@ -561,7 +563,7 @@ class GladiaClient {
   /// [encoding] - audio encoding format (default 'wav/pcm')
   ///
   /// Returns transcription result stream
-  Stream<TranscriptionMessage> streamTranscribeAudio({
+  Stream<RealtimeResponse> streamTranscribeAudio({
     required Stream<List<int>> audioStream,
     LiveTranscriptionOptions? options,
     int sampleRate = 16000,
@@ -580,7 +582,7 @@ class GladiaClient {
       );
 
       // Create stream controller for result stream
-      final streamController = StreamController<TranscriptionMessage>();
+      final streamController = StreamController<RealtimeResponse>();
 
       print('websocket url: ${sessionResult.url}');
 
@@ -593,6 +595,13 @@ class GladiaClient {
             try {
               final transcriptionMessage = TranscriptionMessage.fromJson(message);
               streamController.add(transcriptionMessage);
+            } catch (e) {
+              streamController.addError(GladiaApiException(message: 'Error processing message: $e', innerException: e));
+            }
+          } else if (message is Map<String, dynamic> && message['type'] == 'translation') {
+            try {
+              final translationMessage = TranslationMessage.fromJson(message);
+              streamController.add(translationMessage);
             } catch (e) {
               streamController.addError(GladiaApiException(message: 'Error processing message: $e', innerException: e));
             }
