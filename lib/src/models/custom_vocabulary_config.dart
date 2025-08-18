@@ -4,10 +4,10 @@ import 'package:json_annotation/json_annotation.dart';
 part 'custom_vocabulary_config.g.dart';
 
 @immutable
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class CustomVocabularyConfig {
-  @JsonKey(name: 'vocabulary')
-  final CustomVocabularyConfigVocabulary vocabulary;
+  @JsonKey(name: 'vocabulary', fromJson: _vocabularyFromJson, toJson: _vocabularyToJson)
+  final CustomVocabularyConfigVocabulary? vocabulary;
 
   @JsonKey(name: 'default_intensity')
   final double? defaultIntensity;
@@ -18,11 +18,20 @@ class CustomVocabularyConfig {
   });
 
   /// Creates [CustomVocabularyConfig] from JSON data
-  factory CustomVocabularyConfig.fromJson(Map<String, dynamic> json) =>
-      _$CustomVocabularyConfigFromJson(json);
+  factory CustomVocabularyConfig.fromJson(Map<String, dynamic> json) => _$CustomVocabularyConfigFromJson(json);
 
   /// Преобразует в JSON
   Map<String, dynamic> toJson() => _$CustomVocabularyConfigToJson(this);
+
+  static CustomVocabularyConfigVocabulary? _vocabularyFromJson(Map<String, dynamic>? json) {
+    if (json == null) return null;
+    return CustomVocabularyConfigVocabulary.fromJson(json);
+  }
+
+  static Map<String, dynamic>? _vocabularyToJson(CustomVocabularyConfigVocabulary? config) {
+    if (config == null) return null;
+    return config.toJson();
+  }
 }
 
 @immutable
@@ -57,11 +66,8 @@ class CustomVocabularyConfigVocabulary {
   });
 
   /// Creates [CustomVocabularyConfigVocabulary] from JSON data
-  factory CustomVocabularyConfigVocabulary.fromJson(
-          Map<String, dynamic> json) =>
-      _$CustomVocabularyConfigVocabularyFromJson(json);
+  factory CustomVocabularyConfigVocabulary.fromJson(Map<String, dynamic> json) => _$CustomVocabularyConfigVocabularyFromJson(json);
 
   /// Converts to JSON
-  Map<String, dynamic> toJson() =>
-      _$CustomVocabularyConfigVocabularyToJson(this);
+  Map<String, dynamic> toJson() => _$CustomVocabularyConfigVocabularyToJson(this);
 }

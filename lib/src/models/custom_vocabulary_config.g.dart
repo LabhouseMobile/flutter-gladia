@@ -9,16 +9,19 @@ part of 'custom_vocabulary_config.dart';
 CustomVocabularyConfig _$CustomVocabularyConfigFromJson(
         Map<String, dynamic> json) =>
     CustomVocabularyConfig(
-      vocabulary: CustomVocabularyConfigVocabulary.fromJson(
-          json['vocabulary'] as Map<String, dynamic>),
+      vocabulary: CustomVocabularyConfig._vocabularyFromJson(
+          json['vocabulary'] as Map<String, dynamic>?),
       defaultIntensity: (json['default_intensity'] as num?)?.toDouble(),
     );
 
 Map<String, dynamic> _$CustomVocabularyConfigToJson(
         CustomVocabularyConfig instance) =>
     <String, dynamic>{
-      'vocabulary': instance.vocabulary,
-      'default_intensity': instance.defaultIntensity,
+      if (CustomVocabularyConfig._vocabularyToJson(instance.vocabulary)
+          case final value?)
+        'vocabulary': value,
+      if (instance.defaultIntensity case final value?)
+        'default_intensity': value,
     };
 
 CustomVocabularyConfigVocabulary _$CustomVocabularyConfigVocabularyFromJson(

@@ -18,7 +18,7 @@ class RealtimeProcessing {
   final bool? customVocabulary;
 
   /// Custom vocabulary configuration, if custom_vocabulary is enabled
-  @JsonKey(name: 'custom_vocabulary_config')
+  @JsonKey(name: 'custom_vocabulary_config', fromJson: _customVocabularyConfigFromJson, toJson: _customVocabularyConfigToJson)
   final CustomVocabularyConfig? customVocabularyConfig;
 
   /// If true, enable custom spelling for the transcription.
@@ -26,7 +26,7 @@ class RealtimeProcessing {
   final bool? customSpelling;
 
   /// Custom spelling configuration, if custom_spelling is enabled
-  @JsonKey(name: 'custom_spelling_config')
+  @JsonKey(name: 'custom_spelling_config', fromJson: _customSpellingConfigFromJson, toJson: _customSpellingConfigToJson)
   final CustomSpellingConfig? customSpellingConfig;
 
   /// If true, enable translation for the transcription
@@ -34,7 +34,7 @@ class RealtimeProcessing {
   final bool? translation;
 
   /// Translation configuration, if translation is enabled
-  @JsonKey(name: 'translation_config')
+  @JsonKey(name: 'translation_config', fromJson: _translationConfigFromJson, toJson: _translationConfigToJson)
   final TranslationConfig? translationConfig;
 
   /// If true, enable named entity recognition for the transcription.
@@ -61,4 +61,34 @@ class RealtimeProcessing {
   factory RealtimeProcessing.fromJson(Map<String, dynamic> json) => _$RealtimeProcessingFromJson(json);
 
   Map<String, dynamic> toJson() => _$RealtimeProcessingToJson(this);
+
+  static CustomVocabularyConfig? _customVocabularyConfigFromJson(Map<String, dynamic>? json) {
+    if (json == null) return null;
+    return CustomVocabularyConfig.fromJson(json);
+  }
+
+  static Map<String, dynamic>? _customVocabularyConfigToJson(CustomVocabularyConfig? config) {
+    if (config == null) return null;
+    return config.toJson();
+  }
+
+  static CustomSpellingConfig? _customSpellingConfigFromJson(Map<String, dynamic>? json) {
+    if (json == null) return null;
+    return CustomSpellingConfig.fromJson(json);
+  }
+
+  static Map<String, dynamic>? _customSpellingConfigToJson(CustomSpellingConfig? config) {
+    if (config == null) return null;
+    return config.toJson();
+  }
+
+  static TranslationConfig? _translationConfigFromJson(Map<String, dynamic>? json) {
+    if (json == null) return null;
+    return TranslationConfig.fromJson(json);
+  }
+
+  static Map<String, dynamic>? _translationConfigToJson(TranslationConfig? config) {
+    if (config == null) return null;
+    return config.toJson();
+  }
 }
