@@ -19,17 +19,26 @@ MessagesConfig _$MessagesConfigFromJson(Map<String, dynamic> json) =>
       receiveAcknowledgments: json['receive_acknowledgments'] as bool?,
       receiveErrors: json['receive_errors'] as bool?,
       receiveLifecycleEvents: json['receive_lifecycle_events'] as bool?,
+      receivePartialTranscripts: json['receive_partial_transcripts'] as bool?,
     );
 
 Map<String, dynamic> _$MessagesConfigToJson(MessagesConfig instance) =>
     <String, dynamic>{
-      'receive_final_transcripts': instance.receiveFinalTranscripts,
-      'receive_speech_events': instance.receiveSpeechEvents,
-      'receive_pre_processing_events': instance.receivePreProcessingEvents,
-      'receive_realtime_processing_events':
-          instance.receiveRealtimeProcessingEvents,
-      'receive_post_processing_events': instance.receivePostProcessingEvents,
-      'receive_acknowledgments': instance.receiveAcknowledgments,
-      'receive_errors': instance.receiveErrors,
-      'receive_lifecycle_events': instance.receiveLifecycleEvents,
+      if (instance.receiveFinalTranscripts case final value?)
+        'receive_final_transcripts': value,
+      if (instance.receiveSpeechEvents case final value?)
+        'receive_speech_events': value,
+      if (instance.receivePreProcessingEvents case final value?)
+        'receive_pre_processing_events': value,
+      if (instance.receiveRealtimeProcessingEvents case final value?)
+        'receive_realtime_processing_events': value,
+      if (instance.receivePostProcessingEvents case final value?)
+        'receive_post_processing_events': value,
+      if (instance.receiveAcknowledgments case final value?)
+        'receive_acknowledgments': value,
+      if (instance.receiveErrors case final value?) 'receive_errors': value,
+      if (instance.receiveLifecycleEvents case final value?)
+        'receive_lifecycle_events': value,
+      if (instance.receivePartialTranscripts case final value?)
+        'receive_partial_transcripts': value,
     };

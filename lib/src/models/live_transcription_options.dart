@@ -2,12 +2,12 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
 import '../enums/enums.dart';
+import 'callback_config.dart';
 import 'language_config.dart';
+import 'messages_config.dart';
+import 'post_processing.dart';
 import 'pre_processing.dart';
 import 'realtime_processing.dart';
-import 'post_processing.dart';
-import 'messages_config.dart';
-import 'callback_config.dart';
 
 part 'live_transcription_options.g.dart';
 
@@ -16,92 +16,72 @@ part 'live_transcription_options.g.dart';
 @JsonSerializable()
 class LiveTranscriptionOptions {
   ///The encoding format of the audio stream
-  @JsonKey(
-      name: 'encoding', fromJson: _encodingFromJson, toJson: _encodingToJson)
+  @JsonKey(name: 'encoding', fromJson: _encodingFromJson, toJson: _encodingToJson, includeIfNull: false)
   final Encoding? encoding;
 
   /// The bit depth of the audio stream
-  @JsonKey(
-      name: 'bit_depth', fromJson: _bitDepthFromJson, toJson: _bitDepthToJson)
+  @JsonKey(name: 'bit_depth', fromJson: _bitDepthFromJson, toJson: _bitDepthToJson, includeIfNull: false)
   final BitDepth? bitDepth;
 
   /// The sample rate of the audio stream
-  @JsonKey(
-      name: 'sample_rate',
-      fromJson: _sampleRateFromJson,
-      toJson: _sampleRateToJson)
+  @JsonKey(name: 'sample_rate', fromJson: _sampleRateFromJson, toJson: _sampleRateToJson, includeIfNull: false)
   final SampleRate? sampleRate;
 
   /// The number of channels of the audio stream
   /// Required range: 1 <= x <= 8
-  @JsonKey(name: 'channels')
+  @JsonKey(name: 'channels', includeIfNull: false)
   final int? channels;
 
   /// Custom metadata you can attach to this live transcription
   /// Example: { "user": "John Doe" }
-  @JsonKey(name: 'custom_metadata')
+  @JsonKey(name: 'custom_metadata', includeIfNull: false)
   final Map<String, dynamic>? customMetadata;
 
   /// The model used to process the audio. "solaria-1" is used by default.
   /// Available options:
   /// - "solaria-1" // default
-  @JsonKey(name: 'model')
+  @JsonKey(name: 'model', includeIfNull: false)
   final String? model;
 
   /// The endpointing duration in seconds. Endpointing is the duration of silence which will cause an utterance to be considered as finished
   /// Required range: 0.01 <= x <= 10
   /// Default: 0.05
-  @JsonKey(name: 'endpointing')
+  @JsonKey(name: 'endpointing', includeIfNull: false)
   final double? endpointing;
 
   /// The maximum duration in seconds without endpointing. If endpointing is not detected after this duration, current utterance will be considered as finished
   /// Required range: 5 <= x <= 60
   /// Default: 5
-  @JsonKey(name: 'maximum_duration_without_endpointing')
+  @JsonKey(name: 'maximum_duration_without_endpointing', includeIfNull: false)
   final double? maximumDurationWithoutEndpointing;
 
   /// Конфигурация языка
-  @JsonKey(fromJson: _languageConfigFromJson, toJson: _languageConfigToJson)
+  @JsonKey(name: 'language_config', fromJson: _languageConfigFromJson, toJson: _languageConfigToJson, includeIfNull: false)
   final LanguageConfig? languageConfig;
 
   /// Конфигурация предварительной обработки
-  @JsonKey(
-      name: 'pre_processing',
-      fromJson: _preProcessingFromJson,
-      toJson: _preProcessingToJson)
+  @JsonKey(name: 'pre_processing', fromJson: _preProcessingFromJson, toJson: _preProcessingToJson, includeIfNull: false)
   final PreProcessing? preProcessing;
 
   /// Конфигурация обработки в реальном времени
-  @JsonKey(
-      name: 'realtime_processing',
-      fromJson: _realtimeProcessingFromJson,
-      toJson: _realtimeProcessingToJson)
+  @JsonKey(name: 'realtime_processing', fromJson: _realtimeProcessingFromJson, toJson: _realtimeProcessingToJson, includeIfNull: false)
   final RealtimeProcessing? realtimeProcessing;
 
   /// Specify the post-processing configuration
-  @JsonKey(
-      name: 'post_processing',
-      fromJson: _postProcessingFromJson,
-      toJson: _postProcessingToJson)
+  @JsonKey(name: 'post_processing', fromJson: _postProcessingFromJson, toJson: _postProcessingToJson, includeIfNull: false)
   final PostProcessing? postProcessing;
 
   /// Specify the websocket messages configuration
-  @JsonKey(
-      name: 'messages_config',
-      fromJson: _messagesConfigFromJson,
-      toJson: _messagesConfigToJson)
+  @JsonKey(name: 'messages_config', fromJson: _messagesConfigFromJson, toJson: _messagesConfigToJson, includeIfNull: false)
   final MessagesConfig? messagesConfig;
 
   /// If true, messages will be sent to configured url.
   /// Default: false
-  @JsonKey(name: 'callback')
+  @JsonKey(name: 'callback', includeIfNull: false)
   final bool? callback;
 
   /// Specify the callback configuration
-  @JsonKey(
-      name: 'callback_config',
-      fromJson: _callbackConfigFromJson,
-      toJson: _callbackConfigToJson)
+  @JsonKey(name: 'callback_config', fromJson: _callbackConfigFromJson, toJson: _callbackConfigToJson, includeIfNull: false)
   final CallbackConfig? callbackConfig;
 
   /// Creates a new instance of [LiveTranscriptionOptions]
@@ -123,8 +103,7 @@ class LiveTranscriptionOptions {
     this.callbackConfig,
   });
 
-  factory LiveTranscriptionOptions.fromJson(Map<String, dynamic> json) =>
-      _$LiveTranscriptionOptionsFromJson(json);
+  factory LiveTranscriptionOptions.fromJson(Map<String, dynamic> json) => _$LiveTranscriptionOptionsFromJson(json);
 
   Map<String, dynamic> toJson() => _$LiveTranscriptionOptionsToJson(this);
 
@@ -210,15 +189,13 @@ class LiveTranscriptionOptions {
   }
 
   /// Converts RealtimeProcessing from JSON
-  static RealtimeProcessing? _realtimeProcessingFromJson(
-      Map<String, dynamic>? json) {
+  static RealtimeProcessing? _realtimeProcessingFromJson(Map<String, dynamic>? json) {
     if (json == null) return null;
     return RealtimeProcessing.fromJson(json);
   }
 
   /// Converts RealtimeProcessing to JSON
-  static Map<String, dynamic>? _realtimeProcessingToJson(
-      RealtimeProcessing? config) {
+  static Map<String, dynamic>? _realtimeProcessingToJson(RealtimeProcessing? config) {
     if (config == null) return null;
     return config.toJson();
   }

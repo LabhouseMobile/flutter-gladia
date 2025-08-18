@@ -1,12 +1,11 @@
-import 'package:meta/meta.dart';
+import 'package:gladia/src/models/base_response.dart';
+import 'package:gladia/src/models/error_data.dart';
+import 'package:gladia/src/models/file_info.dart';
+import 'package:gladia/src/models/result_data.dart';
+import 'package:gladia/src/models/transcription_metadata.dart';
+import 'package:gladia/src/models/transcription_options.dart';
 import 'package:json_annotation/json_annotation.dart';
-
-import 'base_response.dart';
-import 'result_data.dart';
-import 'file_info.dart';
-import 'transcription_metadata.dart';
-import 'transcription_options.dart';
-import 'error_data.dart';
+import 'package:meta/meta.dart';
 
 part 'transcription_result.g.dart';
 
@@ -50,15 +49,13 @@ class TranscriptionResult extends BaseResponse {
   }
 
   /// Returns the duration for compatibility with the old version
-  double? get duration =>
-      file?.audioDuration ?? result?.metadata?.audioDuration;
+  double? get duration => file?.audioDuration ?? result?.metadata?.audioDuration;
 
   /// Returns segments for compatibility with the old version
   List<TranscriptionSegment>? get segments => result?.transcription?.utterances;
 
   /// Creates [TranscriptionResult] from JSON data
-  factory TranscriptionResult.fromJson(Map<String, dynamic> json) =>
-      _$TranscriptionResultFromJson(json);
+  factory TranscriptionResult.fromJson(Map<String, dynamic> json) => _$TranscriptionResultFromJson(json);
 
   /// Converts to JSON
   @override
@@ -69,8 +66,7 @@ class TranscriptionResult extends BaseResponse {
   }
 
   /// Converts request parameters from snake_case to parameters object
-  static TranscriptionOptions? _convertFromRequestParams(
-      Map<String, dynamic>? params) {
+  static TranscriptionOptions? _convertFromRequestParams(Map<String, dynamic>? params) {
     if (params == null) return null;
 
     final Map<String, dynamic> converted = {};
@@ -176,8 +172,7 @@ class TranscriptionResultData {
   });
 
   /// Creates [TranscriptionResultData] from JSON data
-  factory TranscriptionResultData.fromJson(Map<String, dynamic> json) =>
-      _$TranscriptionResultDataFromJson(json);
+  factory TranscriptionResultData.fromJson(Map<String, dynamic> json) => _$TranscriptionResultDataFromJson(json);
 
   /// Converts to JSON
   Map<String, dynamic> toJson() => _$TranscriptionResultDataToJson(this);
@@ -217,8 +212,7 @@ class TranscriptionData extends ResultData {
   });
 
   /// Creates [TranscriptionData] from JSON data
-  factory TranscriptionData.fromJson(Map<String, dynamic> json) =>
-      _$TranscriptionDataFromJson(json);
+  factory TranscriptionData.fromJson(Map<String, dynamic> json) => _$TranscriptionDataFromJson(json);
 
   /// Converts to JSON
   @override
@@ -251,8 +245,7 @@ class SentenceData extends ResultData {
   String? get results => _resultsList?.join(' ');
 
   /// Creates [SentenceData] from JSON data
-  factory SentenceData.fromJson(Map<String, dynamic> json) =>
-      _$SentenceDataFromJson(json);
+  factory SentenceData.fromJson(Map<String, dynamic> json) => _$SentenceDataFromJson(json);
 
   /// Converts to JSON
   @override
@@ -280,8 +273,7 @@ class SubtitleData {
   });
 
   /// Creates [SubtitleData] from JSON data
-  factory SubtitleData.fromJson(Map<String, dynamic> json) =>
-      _$SubtitleDataFromJson(json);
+  factory SubtitleData.fromJson(Map<String, dynamic> json) => _$SubtitleDataFromJson(json);
 
   /// Converts to JSON
   Map<String, dynamic> toJson() => _$SubtitleDataToJson(this);
@@ -328,8 +320,7 @@ class TranscriptionSegment {
   });
 
   /// Creates [TranscriptionSegment] from JSON data
-  factory TranscriptionSegment.fromJson(Map<String, dynamic> json) =>
-      _$TranscriptionSegmentFromJson(json);
+  factory TranscriptionSegment.fromJson(Map<String, dynamic> json) => _$TranscriptionSegmentFromJson(json);
 
   /// Converts to JSON
   Map<String, dynamic> toJson() => _$TranscriptionSegmentToJson(this);

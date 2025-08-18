@@ -3,11 +3,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gladia/src/models/transcription_list.dart';
 import 'package:http_parser/http_parser.dart';
 
-import 'models/models.dart';
 import 'exceptions/exceptions.dart';
+import 'models/models.dart';
 
 /// Main class for working with Gladia API
 class GladiaClient {
@@ -28,22 +29,12 @@ class GladiaClient {
   /// [apiKey] - API key for accessing Gladia
   /// [dio] - optional HTTP client, if not specified, a new one is created
   /// [enableLogging] - enable HTTP request logging
-  GladiaClient({
-    required this.apiKey,
-    Dio? dio,
-    this.enableLogging = false,
-  }) : _dio = dio ?? Dio() {
+  GladiaClient({required this.apiKey, Dio? dio, this.enableLogging = false}) : _dio = dio ?? Dio() {
     _dio.options.baseUrl = _baseUrl;
-    _dio.options.headers = {
-      'x-gladia-key': apiKey,
-      'Content-Type': 'application/json',
-    };
+    _dio.options.headers = {'x-gladia-key': apiKey, 'Content-Type': 'application/json'};
 
     if (enableLogging) {
-      _dio.interceptors.add(LogInterceptor(
-        requestBody: true,
-        responseBody: true,
-      ));
+      _dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
     }
   }
 
@@ -70,25 +61,15 @@ class GladiaClient {
       }
 
       final formData = FormData.fromMap({
-        'audio': await MultipartFile.fromFile(
-          file.path,
-          filename: fileName,
-          contentType: MediaType.parse(mimeType),
-        ),
+        'audio': await MultipartFile.fromFile(file.path, filename: fileName, contentType: MediaType.parse(mimeType)),
       });
 
       // Set temporary headers for multipart/form-data request
       final originalHeaders = Map<String, dynamic>.from(_dio.options.headers);
-      _dio.options.headers = {
-        'x-gladia-key': apiKey,
-        'Content-Type': 'multipart/form-data',
-      };
+      _dio.options.headers = {'x-gladia-key': apiKey, 'Content-Type': 'multipart/form-data'};
 
       // Make request to upload the file
-      final response = await _dio.post(
-        'v2/upload',
-        data: formData,
-      );
+      final response = await _dio.post('v2/upload', data: formData);
 
       // Restore original headers
       _dio.options.headers = originalHeaders;
@@ -110,15 +91,10 @@ class GladiaClient {
           if (jsonData is Map<String, dynamic>) {
             responseData = jsonData;
           } else {
-            throw GladiaApiException(
-              message: 'Response JSON is not an object: ${response.data}',
-            );
+            throw GladiaApiException(message: 'Response JSON is not an object: ${response.data}');
           }
         } catch (e) {
-          throw GladiaApiException(
-            message:
-                'Unable to parse response as JSON: ${response.data}. Error: $e',
-          );
+          throw GladiaApiException(message: 'Unable to parse response as JSON: ${response.data}. Error: $e');
         }
       } else {
         throw GladiaApiException(
@@ -144,16 +120,10 @@ class GladiaClient {
   /// [language] - audio language (optional)
   /// [options] - additional transcription options
   /// Returns [TranscriptionInitResult] with task ID and URL for getting the result
-  Future<TranscriptionInitResult> initiateTranscription({
-    required String audioUrl,
-    String? language,
-    TranscriptionOptions? options,
-  }) async {
+  Future<TranscriptionInitResult> initiateTranscription({required String audioUrl, String? language, TranscriptionOptions? options}) async {
     try {
       // Prepare request parameters
-      final Map<String, dynamic> requestData = {
-        'audio_url': audioUrl,
-      };
+      final Map<String, dynamic> requestData = {'audio_url': audioUrl};
 
       // Add language if specified
       if (language != null) {
@@ -172,10 +142,7 @@ class GladiaClient {
       }
 
       // Make request for transcription using the new v2/pre-recorded endpoint
-      final response = await _dio.post(
-        'v2/pre-recorded',
-        data: requestData,
-      );
+      final response = await _dio.post('v2/pre-recorded', data: requestData);
 
       // Check that the response contains data and is of the correct type
       if (response.data == null) {
@@ -194,15 +161,10 @@ class GladiaClient {
           if (jsonData is Map<String, dynamic>) {
             responseData = jsonData;
           } else {
-            throw GladiaApiException(
-              message: 'Response JSON is not an object: ${response.data}',
-            );
+            throw GladiaApiException(message: 'Response JSON is not an object: ${response.data}');
           }
         } catch (e) {
-          throw GladiaApiException(
-            message:
-                'Unable to parse response as JSON: ${response.data}. Error: $e',
-          );
+          throw GladiaApiException(message: 'Unable to parse response as JSON: ${response.data}. Error: $e');
         }
       } else {
         throw GladiaApiException(
@@ -213,17 +175,11 @@ class GladiaClient {
 
       // Validate required fields before creating the object
       if (!responseData.containsKey('id')) {
-        throw GladiaApiException(
-          message:
-              'Response missing required field: id. Response: $responseData',
-        );
+        throw GladiaApiException(message: 'Response missing required field: id. Response: $responseData');
       }
 
       if (!responseData.containsKey('result_url')) {
-        throw GladiaApiException(
-          message:
-              'Response missing required field: result_url. Response: $responseData',
-        );
+        throw GladiaApiException(message: 'Response missing required field: result_url. Response: $responseData');
       }
 
       return TranscriptionInitResult.fromJson(responseData);
@@ -241,8 +197,7 @@ class GladiaClient {
   ///
   /// [transcriptionIdOrUrl] - task ID or full URL for getting the result
   /// Returns [TranscriptionResult] with transcription results
-  Future<TranscriptionResult> getTranscriptionResult(
-      String transcriptionIdOrUrl) async {
+  Future<TranscriptionResult> getTranscriptionResult(String transcriptionIdOrUrl) async {
     try {
       String url;
       bool isAbsoluteUrl = false;
@@ -264,10 +219,7 @@ class GladiaClient {
         tempDio.options.headers = _dio.options.headers;
 
         if (enableLogging) {
-          tempDio.interceptors.add(LogInterceptor(
-            requestBody: true,
-            responseBody: true,
-          ));
+          tempDio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
         }
 
         response = await tempDio.get(url);
@@ -292,28 +244,19 @@ class GladiaClient {
           if (jsonData is Map<String, dynamic>) {
             responseData = jsonData;
           } else {
-            throw const FormatException(
-                'Response is not a correct JSON object');
+            throw const FormatException('Response is not a correct JSON object');
           }
         } catch (e) {
-          throw GladiaApiException(
-            message: 'Unable to parse response as JSON: ${response.data}',
-          );
+          throw GladiaApiException(message: 'Unable to parse response as JSON: ${response.data}');
         }
       } else {
-        throw GladiaApiException(
-          message:
-              'Invalid response format from server: ${response.data.runtimeType}',
-        );
+        throw GladiaApiException(message: 'Invalid response format from server: ${response.data.runtimeType}');
       }
 
       // Check transcription status
       final status = responseData['status'];
       if (status == null) {
-        throw GladiaApiException(
-          message: 'Status field is missing in response',
-          responseData: responseData,
-        );
+        throw GladiaApiException(message: 'Status field is missing in response', responseData: responseData);
       }
 
       final String statusStr = status is String ? status : status.toString();
@@ -336,8 +279,7 @@ class GladiaClient {
 
             final transcription = result['transcription'];
             if (transcription is! Map<String, dynamic>) {
-              throw const FormatException(
-                  'Transcription field is not an object');
+              throw const FormatException('Transcription field is not an object');
             }
 
             // Get full transcription text
@@ -380,44 +322,29 @@ class GladiaClient {
             return TranscriptionResult(
               id: responseData['id'] as String? ?? 'unknown_id',
               status: 'done',
-              file: FileInfo(
-                audioDuration: duration,
-              ),
+              file: FileInfo(audioDuration: duration),
               result: TranscriptionResultData(
-                transcription: TranscriptionData(
-                  fullTranscript: fullTranscript,
-                  languages: language != null ? [language] : null,
-                ),
+                transcription: TranscriptionData(fullTranscript: fullTranscript, languages: language != null ? [language] : null),
               ),
             );
           } catch (innerError) {
             // If even backup option didn't work, throw original error with useful information
-            throw GladiaApiException(
-              message:
-                  'Unable to parse result: $e. Additional error: $innerError',
-              responseData: responseData,
-            );
+            throw GladiaApiException(message: 'Unable to parse result: $e. Additional error: $innerError', responseData: responseData);
           }
         }
       } else if (statusStr == 'processing' || statusStr == 'queued') {
         // Transcription not completed yet
         throw GladiaApiException(
-          message:
-              'Transcription not completed yet. Current status: $statusStr',
+          message: 'Transcription not completed yet. Current status: $statusStr',
           statusCode: 202,
           responseData: responseData,
         );
       } else {
         // Transcription error
         final errorMessage = responseData['error'];
-        final errorText =
-            errorMessage != null ? errorMessage.toString() : statusStr;
+        final errorText = errorMessage != null ? errorMessage.toString() : statusStr;
 
-        throw GladiaApiException(
-          message: 'Transcription error: $errorText',
-          statusCode: 400,
-          responseData: responseData,
-        );
+        throw GladiaApiException(message: 'Transcription error: $errorText', statusCode: 400, responseData: responseData);
       }
     } on DioException catch (e) {
       throw GladiaApiException.fromDioError(e);
@@ -453,11 +380,7 @@ class GladiaClient {
       final uploadResult = await uploadAudioFile(file);
 
       // Step 2: Initiate transcription
-      final transcriptionInit = await initiateTranscription(
-        audioUrl: uploadResult.audioUrl,
-        language: language,
-        options: options,
-      );
+      final transcriptionInit = await initiateTranscription(audioUrl: uploadResult.audioUrl, language: language, options: options);
 
       // If no need to wait for result, return initialization data
       if (!waitForResult) {
@@ -468,8 +391,7 @@ class GladiaClient {
       int attempts = 0;
       while (attempts < maxAttempts) {
         try {
-          final result =
-              await getTranscriptionResult(transcriptionInit.resultUrl);
+          final result = await getTranscriptionResult(transcriptionInit.resultUrl);
           return result; // Successfully got result
         } on GladiaApiException catch (e) {
           // If status 202, transcription not completed yet
@@ -485,10 +407,7 @@ class GladiaClient {
       }
 
       // If maximum attempts exceeded, return error
-      throw GladiaApiException(
-        message: 'Maximum waiting time for transcription result exceeded',
-        statusCode: 408,
-      );
+      throw GladiaApiException(message: 'Maximum waiting time for transcription result exceeded', statusCode: 408);
     } catch (e) {
       if (e is GladiaApiException) {
         rethrow;
@@ -510,10 +429,7 @@ class GladiaClient {
   Future<bool> deleteTranscription({required String id}) async {
     try {
       final originalHeaders = Map<String, dynamic>.from(_dio.options.headers);
-      _dio.options.headers = {
-        'x-gladia-key': apiKey,
-        'Content-Type': 'application/json',
-      };
+      _dio.options.headers = {'x-gladia-key': apiKey, 'Content-Type': 'application/json'};
 
       final response = await _dio.delete('v2/pre-recorded/$id');
 
@@ -539,26 +455,15 @@ class GladiaClient {
   /// [recordId] - recording ID
   /// [outputPath] - path where the file will be saved (optional)
   /// Returns saved file path
-  Future<String> downloadFile({
-    required String recordId,
-    String? outputPath,
-  }) async {
+  Future<String> downloadFile({required String recordId, String? outputPath}) async {
     try {
       final originalHeaders = Map<String, dynamic>.from(_dio.options.headers);
-      _dio.options.headers = {
-        'x-gladia-key': apiKey,
-      };
+      _dio.options.headers = {'x-gladia-key': apiKey};
 
       // Set parameters for downloading file
-      final options = Options(
-        responseType: ResponseType.bytes,
-        followRedirects: true,
-      );
+      final options = Options(responseType: ResponseType.bytes, followRedirects: true);
 
-      final response = await _dio.get(
-        'v2/pre-recorded/$recordId/file',
-        options: options,
-      );
+      final response = await _dio.get('v2/pre-recorded/$recordId/file', options: options);
 
       _dio.options.headers = originalHeaders;
 
@@ -571,10 +476,8 @@ class GladiaClient {
 
       // If there is Content-Disposition header, try to extract file name
       final contentDisposition = response.headers.value('content-disposition');
-      if (contentDisposition != null &&
-          contentDisposition.contains('filename=')) {
-        final match =
-            RegExp(r'filename="?([^"]+)"?').firstMatch(contentDisposition);
+      if (contentDisposition != null && contentDisposition.contains('filename=')) {
+        final match = RegExp(r'filename="?([^"]+)"?').firstMatch(contentDisposition);
         if (match != null) {
           fileName = match.group(1) ?? fileName;
         }
@@ -605,20 +508,12 @@ class GladiaClient {
   /// [options] - additional transcription options
   ///
   /// @deprecated Use [transcribeFile] instead of this method
-  Future<TranscriptionResult> transcribeAudio({
-    required String audioFile,
-    String? language,
-    TranscriptionOptions? options,
-  }) async {
+  Future<TranscriptionResult> transcribeAudio({required String audioFile, String? language, TranscriptionOptions? options}) async {
     try {
       // Check if audioFile is URL or path to file
       if (audioFile.startsWith('http')) {
         // If it's URL, initiate transcription and wait for result
-        final transcriptionInit = await initiateTranscription(
-          audioUrl: audioFile,
-          language: language,
-          options: options,
-        );
+        final transcriptionInit = await initiateTranscription(audioUrl: audioFile, language: language, options: options);
 
         // Wait for result (5 attempts with 2 seconds interval)
         int attempts = 0;
@@ -635,25 +530,15 @@ class GladiaClient {
           }
         }
 
-        throw GladiaApiException(
-          message: 'Maximum waiting time for transcription result exceeded',
-          statusCode: 408,
-        );
+        throw GladiaApiException(message: 'Maximum waiting time for transcription result exceeded', statusCode: 408);
       } else {
         // If it's path to file, use transcribeFile
         final file = File(audioFile);
         if (!file.existsSync()) {
-          throw GladiaApiException(
-            message: 'File not found: $audioFile',
-            statusCode: 404,
-          );
+          throw GladiaApiException(message: 'File not found: $audioFile', statusCode: 404);
         }
 
-        final result = await transcribeFile(
-          file: file,
-          language: language,
-          options: options,
-        );
+        final result = await transcribeFile(file: file, language: language, options: options);
 
         return result as TranscriptionResult;
       }
@@ -678,8 +563,7 @@ class GladiaClient {
   /// Returns transcription result stream
   Stream<TranscriptionMessage> streamTranscribeAudio({
     required Stream<List<int>> audioStream,
-    String? language,
-    TranscriptionOptions? options,
+    LiveTranscriptionOptions? options,
     int sampleRate = 16000,
     int bitDepth = 16,
     int channels = 1,
@@ -692,28 +576,25 @@ class GladiaClient {
         bitDepth: bitDepth,
         channels: channels,
         encoding: encoding,
-        language: language,
         options: options,
       );
 
       // Create stream controller for result stream
       final streamController = StreamController<TranscriptionMessage>();
 
+      print('websocket url: ${sessionResult.url}');
+
       // Create WebSocket connection
       final socket = createLiveTranscriptionSocket(
         sessionUrl: sessionResult.url,
         onMessage: (message) {
-          if (message is Map<String, dynamic> &&
-              message['type'] == 'transcript') {
+          print('Gladia message: ${jsonEncode(message)}');
+          if (message is Map<String, dynamic> && message['type'] == 'transcript') {
             try {
-              final transcriptionMessage =
-                  TranscriptionMessage.fromJson(message);
+              final transcriptionMessage = TranscriptionMessage.fromJson(message);
               streamController.add(transcriptionMessage);
             } catch (e) {
-              streamController.addError(GladiaApiException(
-                message: 'Error processing message: $e',
-                innerException: e,
-              ));
+              streamController.addError(GladiaApiException(message: 'Error processing message: $e', innerException: e));
             }
           }
         },
@@ -723,10 +604,7 @@ class GladiaClient {
           }
         },
         onError: (error) {
-          streamController.addError(GladiaApiException(
-            message: 'WebSocket error: $error',
-            innerException: error,
-          ));
+          streamController.addError(GladiaApiException(message: 'WebSocket error: $error', innerException: error));
           if (!streamController.isClosed) {
             streamController.close();
           }
@@ -741,10 +619,7 @@ class GladiaClient {
           }
         },
         onError: (error) {
-          streamController.addError(GladiaApiException(
-            message: 'Error in audio stream: $error',
-            innerException: error,
-          ));
+          streamController.addError(GladiaApiException(message: 'Error in audio stream: $error', innerException: error));
         },
         onDone: () {
           // Send signal about recording end
@@ -763,10 +638,7 @@ class GladiaClient {
         socket.close();
       });
     } catch (e) {
-      throw GladiaApiException(
-        message: 'Error in stream transcription: $e',
-        innerException: e,
-      );
+      throw GladiaApiException(message: 'Error in stream transcription: $e', innerException: e);
     }
   }
 
@@ -785,8 +657,7 @@ class GladiaClient {
     int bitDepth = 16,
     int channels = 1,
     String encoding = 'wav/pcm',
-    String? language,
-    TranscriptionOptions? options,
+    LiveTranscriptionOptions? options,
   }) async {
     try {
       // Prepare request parameters
@@ -797,22 +668,18 @@ class GladiaClient {
         'encoding': encoding,
       };
 
-      // Add language if specified
-      if (language != null) {
-        requestData['language'] = language;
-      }
-
       // Add options if specified
       if (options != null) {
         // Merge parameters from TranscriptionOptions
         requestData.addAll(options.toJson());
       }
 
+      if (kDebugMode) {
+        print('Gladia requestData: ${jsonEncode(requestData)}');
+      }
+
       // Make request for session initialization
-      final response = await _dio.post(
-        'v2/live',
-        data: requestData,
-      );
+      final response = await _dio.post('v2/live', data: requestData);
 
       // Check that the response contains data and is of the correct type
       if (response.data == null) {
@@ -831,15 +698,10 @@ class GladiaClient {
           if (jsonData is Map<String, dynamic>) {
             responseData = jsonData;
           } else {
-            throw GladiaApiException(
-              message: 'Response JSON is not an object: ${response.data}',
-            );
+            throw GladiaApiException(message: 'Response JSON is not an object: ${response.data}');
           }
         } catch (e) {
-          throw GladiaApiException(
-            message:
-                'Unable to parse response as JSON: ${response.data}. Error: $e',
-          );
+          throw GladiaApiException(message: 'Unable to parse response as JSON: ${response.data}. Error: $e');
         }
       } else {
         throw GladiaApiException(
@@ -873,12 +735,7 @@ class GladiaClient {
     void Function()? onDone,
     Function? onError,
   }) {
-    return LiveTranscriptionSocket(
-      url: sessionUrl,
-      onMessage: onMessage,
-      onDone: onDone,
-      onError: onError,
-    );
+    return LiveTranscriptionSocket(url: sessionUrl, onMessage: onMessage, onDone: onDone, onError: onError);
   }
 
   /// Gets live transcription result by ID
@@ -886,9 +743,7 @@ class GladiaClient {
   /// [id] - ID of the live transcription result
   ///
   /// Returns [LiveTranscriptionResult] with transcription results
-  Future<LiveTranscriptionResult> getLiveTranscriptionResult({
-    required String id,
-  }) async {
+  Future<LiveTranscriptionResult> getLiveTranscriptionResult({required String id}) async {
     final response = await _dio.get('v2/live/$id');
     return LiveTranscriptionResult.fromJson(response.data);
   }
@@ -900,10 +755,7 @@ class GladiaClient {
   Future<bool> deleteLiveTranscription({required String id}) async {
     try {
       final originalHeaders = Map<String, dynamic>.from(_dio.options.headers);
-      _dio.options.headers = {
-        'x-gladia-key': apiKey,
-        'Content-Type': 'application/json',
-      };
+      _dio.options.headers = {'x-gladia-key': apiKey, 'Content-Type': 'application/json'};
 
       final response = await _dio.delete('v2/live/$id');
 
