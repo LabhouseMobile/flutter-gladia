@@ -581,74 +581,78 @@ class GladiaClient {
         options: options,
       );
 
-      // Create stream controller for result stream
-      final streamController = StreamController<RealtimeResponse>();
-
-      print('websocket url: ${sessionResult.url}');
-
-      // Create WebSocket connection
-      final socket = createLiveTranscriptionSocket(
-        sessionUrl: sessionResult.url,
-        onMessage: (message) {
-          print('Gladia message: ${jsonEncode(message)}');
-          if (message is Map<String, dynamic> && message['type'] == 'transcript') {
-            try {
-              final transcriptionMessage = TranscriptionMessage.fromJson(message);
-              streamController.add(transcriptionMessage);
-            } catch (e) {
-              streamController.addError(GladiaApiException(message: 'Error processing message: $e', innerException: e));
-            }
-          } else if (message is Map<String, dynamic> && message['type'] == 'translation') {
-            try {
-              final translationMessage = TranslationMessage.fromJson(message);
-              streamController.add(translationMessage);
-            } catch (e) {
-              streamController.addError(GladiaApiException(message: 'Error processing message: $e', innerException: e));
-            }
-          }
-        },
-        onDone: () {
-          if (!streamController.isClosed) {
-            streamController.close();
-          }
-        },
-        onError: (error) {
-          streamController.addError(GladiaApiException(message: 'WebSocket error: $error', innerException: error));
-          if (!streamController.isClosed) {
-            streamController.close();
-          }
-        },
-      );
-
-      // Subscribe to audio data stream
-      final audioSubscription = audioStream.listen(
-        (data) {
-          if (socket.isConnected) {
-            socket.sendAudioData(data);
-          }
-        },
-        onError: (error) {
-          streamController.addError(GladiaApiException(message: 'Error in audio stream: $error', innerException: error));
-        },
-        onDone: () {
-          // Send signal about recording end
-          if (socket.isConnected) {
-            socket.sendStopRecording();
-          }
-        },
-      );
-
-      // Return result stream
-      yield* streamController.stream;
-
-      // Free resources when stream ends
-      await streamController.done.then((_) {
-        audioSubscription.cancel();
-        socket.close();
-      });
+      yield* startLiveTranscription(sessionResult.url, audioStream);
     } catch (e) {
       throw GladiaApiException(message: 'Error in stream transcription: $e', innerException: e);
     }
+  }
+
+  Stream<RealtimeResponse> startLiveTranscription(String sessionUrl, Stream<List<int>> audioStream) async* {
+    if (kDebugMode) {
+      print('websocket url: $sessionUrl');
+    }
+
+    final streamController = StreamController<RealtimeResponse>();
+    // Create WebSocket connection
+    final socket = createLiveTranscriptionSocket(
+      sessionUrl: sessionUrl,
+      onMessage: (message) {
+        print('Gladia message: ${jsonEncode(message)}');
+        if (message is Map<String, dynamic> && message['type'] == 'transcript') {
+          try {
+            final transcriptionMessage = TranscriptionMessage.fromJson(message);
+            streamController.add(transcriptionMessage);
+          } catch (e) {
+            streamController.addError(GladiaApiException(message: 'Error processing message: $e', innerException: e));
+          }
+        } else if (message is Map<String, dynamic> && message['type'] == 'translation') {
+          try {
+            final translationMessage = TranslationMessage.fromJson(message);
+            streamController.add(translationMessage);
+          } catch (e) {
+            streamController.addError(GladiaApiException(message: 'Error processing message: $e', innerException: e));
+          }
+        }
+      },
+      onDone: () {
+        if (!streamController.isClosed) {
+          streamController.close();
+        }
+      },
+      onError: (error) {
+        streamController.addError(GladiaApiException(message: 'WebSocket error: $error', innerException: error));
+        if (!streamController.isClosed) {
+          streamController.close();
+        }
+      },
+    );
+
+    // Subscribe to audio data stream
+    final audioSubscription = audioStream.listen(
+      (data) {
+        if (socket.isConnected) {
+          socket.sendAudioData(data);
+        }
+      },
+      onError: (error) {
+        streamController.addError(GladiaApiException(message: 'Error in audio stream: $error', innerException: error));
+      },
+      onDone: () {
+        // Send signal about recording end
+        if (socket.isConnected) {
+          socket.sendStopRecording();
+        }
+      },
+    );
+
+    // Return result stream
+    yield* streamController.stream;
+
+    // Free resources when stream ends
+    await streamController.done.then((_) {
+      audioSubscription.cancel();
+      socket.close();
+    });
   }
 
   /// Initializes session for speech recognition in real time
