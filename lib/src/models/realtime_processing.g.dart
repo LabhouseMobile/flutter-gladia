@@ -30,13 +30,20 @@ RealtimeProcessing _$RealtimeProcessingFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$RealtimeProcessingToJson(RealtimeProcessing instance) =>
     <String, dynamic>{
-      'words_accurate_timestamps': instance.wordsAccurateTimestamps,
-      'custom_vocabulary': instance.customVocabulary,
-      'custom_vocabulary_config': instance.customVocabularyConfig,
-      'custom_spelling': instance.customSpelling,
-      'custom_spelling_config': instance.customSpellingConfig,
-      'translation': instance.translation,
-      'translation_config': instance.translationConfig,
-      'named_entity_recognition': instance.namedEntityRecognition,
-      'sentiment_analysis': instance.sentimentAnalysis,
+      if (instance.wordsAccurateTimestamps case final value?)
+        'words_accurate_timestamps': value,
+      if (instance.customVocabulary case final value?)
+        'custom_vocabulary': value,
+      if (instance.customVocabularyConfig case final value?)
+        'custom_vocabulary_config': value,
+      if (instance.customSpelling case final value?) 'custom_spelling': value,
+      if (instance.customSpellingConfig case final value?)
+        'custom_spelling_config': value,
+      if (instance.translation case final value?) 'translation': value,
+      if (instance.translationConfig case final value?)
+        'translation_config': value,
+      if (instance.namedEntityRecognition case final value?)
+        'named_entity_recognition': value,
+      if (instance.sentimentAnalysis case final value?)
+        'sentiment_analysis': value,
     };

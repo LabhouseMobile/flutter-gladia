@@ -7,7 +7,7 @@ part 'realtime_processing.g.dart';
 
 /// Configuration for real-time processing
 @immutable
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class RealtimeProcessing {
   /// Provide accurate timestamps for each word
   @JsonKey(name: 'words_accurate_timestamps')
@@ -58,8 +58,7 @@ class RealtimeProcessing {
     this.sentimentAnalysis,
   });
 
-  factory RealtimeProcessing.fromJson(Map<String, dynamic> json) =>
-      _$RealtimeProcessingFromJson(json);
+  factory RealtimeProcessing.fromJson(Map<String, dynamic> json) => _$RealtimeProcessingFromJson(json);
 
   Map<String, dynamic> toJson() => _$RealtimeProcessingToJson(this);
 }

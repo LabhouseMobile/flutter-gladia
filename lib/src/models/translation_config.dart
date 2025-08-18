@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 part 'translation_config.g.dart';
 
 @immutable
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 
 /// Translation configuration
 class TranslationConfig {
@@ -30,8 +30,7 @@ class TranslationConfig {
     this.matchOriginalUtterances,
   });
 
-  factory TranslationConfig.fromJson(Map<String, dynamic> json) =>
-      _$TranslationConfigFromJson(json);
+  factory TranslationConfig.fromJson(Map<String, dynamic> json) => _$TranslationConfigFromJson(json);
 
   Map<String, dynamic> toJson() => _$TranslationConfigToJson(this);
 }

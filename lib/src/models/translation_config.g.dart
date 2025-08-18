@@ -18,6 +18,7 @@ TranslationConfig _$TranslationConfigFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$TranslationConfigToJson(TranslationConfig instance) =>
     <String, dynamic>{
       'target_languages': instance.targetLanguages,
-      'model': instance.model,
-      'match_original_utterances': instance.matchOriginalUtterances,
+      if (instance.model case final value?) 'model': value,
+      if (instance.matchOriginalUtterances case final value?)
+        'match_original_utterances': value,
     };
