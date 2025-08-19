@@ -1,7 +1,7 @@
-import 'package:gladia/src/models/realtime_response.dart';
+import 'package:gladia/src/models/realtime_message.dart';
 
 /// Class for messages received from API during real-time speech recognition
-class TranscriptionMessage extends RealtimeResponse {
+class TranscriptionMessage extends RealtimeMessage {
   /// Session ID
   final String sessionId;
 

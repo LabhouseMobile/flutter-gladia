@@ -1,7 +1,7 @@
 import 'package:gladia/gladia.dart';
 
 /// Class for messages received from API during real-time speech recognition
-class TranslationMessage extends RealtimeResponse {
+class TranslationMessage extends RealtimeMessage {
   /// Session ID
   final String sessionId;
 

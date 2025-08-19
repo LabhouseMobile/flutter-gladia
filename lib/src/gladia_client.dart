@@ -4,7 +4,8 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:gladia/src/models/realtime_response.dart';
+import 'package:gladia/src/models/realtime_message.dart';
+import 'package:gladia/src/models/speech.dart';
 import 'package:gladia/src/models/transcription_list.dart';
 import 'package:gladia/src/models/translation_message.dart';
 import 'package:http_parser/http_parser.dart';
@@ -563,7 +564,7 @@ class GladiaClient {
   /// [encoding] - audio encoding format (default 'wav/pcm')
   ///
   /// Returns transcription result stream
-  Stream<RealtimeResponse> streamTranscribeAudio({
+  Stream<RealtimeMessage> streamTranscribeAudio({
     required Stream<List<int>> audioStream,
     LiveTranscriptionOptions? options,
     int sampleRate = 16000,
@@ -587,33 +588,41 @@ class GladiaClient {
     }
   }
 
-  Stream<RealtimeResponse> startLiveTranscription(String sessionUrl, Stream<List<int>> audioStream) async* {
+  void _handleMessage(StreamController<RealtimeMessage> streamController, dynamic message) {
+    print('Gladia message: ${jsonEncode(message)}');
+    if (message is! Map<String, dynamic>) return;
+
+    try {
+      switch (message['type']) {
+        case 'transcript':
+          final transcriptionMessage = TranscriptionMessage.fromJson(message);
+          streamController.add(transcriptionMessage);
+          break;
+        case 'translation':
+          final translationMessage = TranslationMessage.fromJson(message);
+          streamController.add(translationMessage);
+          break;
+        case 'speech_start':
+        case 'speech_end':
+          final speechStartMessage = SpeechMessage.fromJson(message);
+          streamController.add(speechStartMessage);
+          break;
+      }
+    } catch (e) {
+      streamController.addError(GladiaApiException(message: 'Error processing message: $e', innerException: e));
+    }
+  }
+
+  Stream<RealtimeMessage> startLiveTranscription(String sessionUrl, Stream<List<int>> audioStream) async* {
     if (kDebugMode) {
       print('websocket url: $sessionUrl');
     }
 
-    final streamController = StreamController<RealtimeResponse>();
+    final streamController = StreamController<RealtimeMessage>();
     // Create WebSocket connection
     final socket = createLiveTranscriptionSocket(
       sessionUrl: sessionUrl,
-      onMessage: (message) {
-        print('Gladia message: ${jsonEncode(message)}');
-        if (message is Map<String, dynamic> && message['type'] == 'transcript') {
-          try {
-            final transcriptionMessage = TranscriptionMessage.fromJson(message);
-            streamController.add(transcriptionMessage);
-          } catch (e) {
-            streamController.addError(GladiaApiException(message: 'Error processing message: $e', innerException: e));
-          }
-        } else if (message is Map<String, dynamic> && message['type'] == 'translation') {
-          try {
-            final translationMessage = TranslationMessage.fromJson(message);
-            streamController.add(translationMessage);
-          } catch (e) {
-            streamController.addError(GladiaApiException(message: 'Error processing message: $e', innerException: e));
-          }
-        }
-      },
+      onMessage: (message) => _handleMessage(streamController, message),
       onDone: () {
         if (!streamController.isClosed) {
           streamController.close();
