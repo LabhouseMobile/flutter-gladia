@@ -58,7 +58,7 @@ class SpeechMessageData {
   /// Creates [SpeechMessageData] from JSON data
   factory SpeechMessageData.fromJson(Map<String, dynamic> json) {
     return SpeechMessageData(
-      time: json['time'] as double,
+      time: (json['time'] as num).toDouble(),
       channel: json['channel'] as int,
     );
   }
